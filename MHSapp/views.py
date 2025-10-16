@@ -815,13 +815,16 @@ class PlaceOrderAPIView(APIView):
 
                 # for item in cart_item_id_list:  
                 # for Out of Stock
-                for item in cart_items: 
+                for item in cart_items:
                     product_variation = item.product_variation_id
+                    quantity = item.Quantity
+                    if product_variation.stock is None or product_variation.stock < quantity:
+                        return Response("Out of Stock")
+                for item in cart_items:
+                    product_variation = item.product_variation_id   
                     quantity = item.Quantity
                     product_variation.stock -= quantity
                     product_variation.save()
-                    if product_variation.stock is None or product_variation.stock < quantity:
-                        return Response("is Out of Stock")
                     # cart_item = Cart_item.objects.get(cart_item_id=item)
                     OrderHistory.objects.create(
                             order_id=order,
