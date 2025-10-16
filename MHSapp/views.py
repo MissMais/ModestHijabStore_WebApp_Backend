@@ -58,7 +58,7 @@ class SendOTP(APIView):
           stored_email=email # store email globlly
           print("OTP Is :",sent_otp)
           emailw=EmailMessage(
-               'Test email Subject',
+               'OTP for password reset',
                f'Your OTP is: {otp}',
                settings.EMAIL_HOST_USER,
                [email]
