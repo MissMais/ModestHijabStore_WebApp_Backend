@@ -814,7 +814,14 @@ class PlaceOrderAPIView(APIView):
                 cart_items = Cart_item.objects.filter(cart_item_id__in=cart_item_id_list)
 
                 # for item in cart_item_id_list:  
+                # for Out of Stock
                 for item in cart_items: 
+                    product_variation = item.product_variation_id
+                    quantity = item.Quantity
+                    product_variation.stock -= quantity
+                    product_variation.save()
+                    if product_variation.stock is None or product_variation.stock < quantity:
+                        return Response("is Out of Stock")
                     # cart_item = Cart_item.objects.get(cart_item_id=item)
                     OrderHistory.objects.create(
                             order_id=order,
@@ -926,115 +933,6 @@ class PlaceOrderAPIView(APIView):
             return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-def post(self, request):
-    try:
-        if request.user.is_anonymous:
-            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        customer = Customers.objects.get(User_id=request.user)
-        cart = Cart.objects.get(customer_id=customer)
-
-        # cart item list
-        cart_item_id_list = [l['cart_item_id'] for l in request.data['cart_item_id']]
-        payment_id = request.data.get("payment_id")
-        payment = Payment.objects.get(pk=payment_id)
-        # delivery address
-        delivery_address_id = request.data.get("Delivery_Address")
-        delivery_address = Address.objects.get(pk=delivery_address_id)
-        payment_confirmation = request.data.get("payment_confirmation", "Pending")
-        order_status = "Placed"
-        # check if first order
-        is_first_order = not Order.objects.filter(Cart_id__customer_id=customer).exists()
-        with transaction.atomic():
-            # create order
-            order = Order.objects.create(
-                Delivery_Address=delivery_address,
-                Cart_id=cart,
-                payment_id=payment,
-                payment_confirmation=payment_confirmation,
-                order_status=order_status
-            )
-            message = "Order has been placed Successfully"
-            Notifications.objects.create(customer_id=customer, notification_msg=message)
-
-            # Save items to OrderHistory
-            cart_items = Cart_item.objects.filter(cart_item_id__in=cart_item_id_list)
-            for item in cart_items:
-                OrderHistory.objects.create(
-                    order_id=order,
-                    customer_id=customer,
-                    cart_item_id=item,
-                )
-
-        user = request.user
-        if order.Cart_id:
-            cart_item = Cart_item.objects.filter(cart_item_id__in=cart_item_id_list)
-
-            # calculate prices
-            sub_total = sum(i.Quantity * i.product_variation_id.product_id.price for i in cart_item)
-            if is_first_order:
-                discount = sub_total * 0.5
-                final_total = sub_total - discount
-            else:
-                discount = 0
-                final_total = sub_total
-
-            context = {
-                "order": [order],
-                "customer_name": user.first_name + " " + user.last_name,
-                "cart_item": [
-                    {
-                        "product_name": i.product_variation_id.product_id.product_description,
-                        "quantity": i.Quantity,
-                        "total_price": i.Quantity * i.product_variation_id.product_id.price
-                    }
-                    for i in cart_item
-                ],
-                "sub_total_price": sub_total,
-                "discount": discount,
-                "final_total": final_total,
-            }
-
-            # send email with html template
-            html_message = render_to_string("receipt.html", context, request=request)
-            msg = EmailMultiAlternatives(
-                subject="Order Confirmation",
-                body="Your order has been placed successfully",
-                from_email="saklen660@gmail.com",
-                to=[user.email],
-            )
-            msg.attach_alternative(html_message, "text/html")
-            msg.send(fail_silently=False)
-
-            # notify admin
-            send_mail(
-                subject="New Order Placed",
-                message=f"A new order has been placed by {user.email}.",
-                from_email="saklen660@gmail.com",
-                recipient_list=["mohdshaik639379@gmail.com"],
-                fail_silently=False,
-            )
-        return Response(
-            {
-                "message": "Order placed successfully",
-                "order_id": order.Order_id,
-                "is_first_order": is_first_order,
-                "sub_total": sub_total,
-                "discount": discount,
-                "final_total": final_total
-            },
-            status=status.HTTP_201_CREATED
-        )
-
-    except Customers.DoesNotExist:
-        return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
-    except Address.DoesNotExist:
-        return Response({"error": "Delivery address not found"}, status=status.HTTP_404_NOT_FOUND)
-    except Payment.DoesNotExist:
-        return Response({"error": "Payment record not found"}, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET","POST","PUT","DELETE"])
