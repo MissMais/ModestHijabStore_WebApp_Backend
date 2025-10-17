@@ -39,6 +39,7 @@ class Customers(models.Model):
     User_id=models.OneToOneField(CustomUser,on_delete=models.CASCADE  )
     Email=models.EmailField(max_length=25 , unique=True) 
     Contact=models.PositiveBigIntegerField()
+    Profile_picture=models.ImageField(blank=True, null=True)
 
 class Address(models.Model):
     Address_id = models.AutoField(primary_key=True )

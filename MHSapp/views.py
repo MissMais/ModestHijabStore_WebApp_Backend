@@ -234,7 +234,7 @@ def UserView(request):
 def CustomerView(request):
     if request.method=="GET":
         users=Customers.objects.all()
-        ser=CustomerSerializers(users , many=True)
+        ser=CustomerSerializers(users , many=True,context={"request":request})
         return Response(ser.data)
     
     elif request.method=="POST":
