@@ -245,7 +245,6 @@ class Size(models.Model):
         # managed = False
         db_table = 'size'
 
-
 class ProductImages(models.Model):
     product_images_id= models.AutoField(primary_key=True)
     image_url = models.ImageField(null=True , blank=True) 
