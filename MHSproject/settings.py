@@ -87,7 +87,7 @@ CORS_ALLOWED_ORIGINS=[
    'http://localhost:5173', 
    "http://localhost:8081",
    "http://192.168.29.199:8081",
-   "https://0be0e1ab505c.ngrok-free.app"
+   "https://dc83de49037c.ngrok-free.app"
    
 ]
 CORS_ALLOW_HEADERS = list(default_headers) + [
@@ -185,6 +185,7 @@ import os
 STATIC_URL = 'static/'
 MEDIA_URL="/media/"
 MEDIA_ROOT=os.path.join(BASE_DIR,"media")
+MEDIA_ROOT=os.path.join(BASE_DIR,"static")
 
 
 # Default primary key field type

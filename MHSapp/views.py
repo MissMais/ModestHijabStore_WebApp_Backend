@@ -141,6 +141,8 @@ class LogoutView(APIView):
 def Customer_registration(request):
     try:
         data = request.data
+        print("************************************")
+        print(data)
         contact = data.get("contact")
         if not re.match(r'^[6-9]\d{9}$', str(contact)):
             return Response(
@@ -160,7 +162,8 @@ def Customer_registration(request):
         customer = Customers.objects.create(
             User_id=user,
             Contact=data["contact"],
-            Email=data["email"]  # optional, else skip this field
+            Email=data["email"],# optional, else skip this field
+            Profile_picture=data["Profile_picture"] 
         )
 
         # Create Address
