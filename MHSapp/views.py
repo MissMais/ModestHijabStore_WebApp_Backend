@@ -141,6 +141,12 @@ class LogoutView(APIView):
 def Customer_registration(request):
     try:
         data = request.data
+        contact = data.get("contact")
+        if not re.match(r'^[6-9]\d{9}$', str(contact)):
+            return Response(
+                {"error": "Invalid contact number"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         # Create CustomUser
         user = CustomUser.objects.create(
             email=data["email"],
