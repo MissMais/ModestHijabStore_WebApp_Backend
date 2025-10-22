@@ -231,7 +231,6 @@ def UserView(request):
     
     elif request.method == "DELETE":
         user_id = request.GET.get("id")
-        print(user_id)
         obj = CustomUser.objects.get(id=user_id)
         obj.delete()
         return Response("User deleted")
@@ -255,18 +254,21 @@ def CustomerView(request):
         return Response(ser.errors)
     
     elif request.method=="PUT":
-        cart_id=request.data.get("id")
-        cart_obj=Customers.objects.get(id=cart_id)
-        ser=CustomerSerializers(cart_obj , data=request.data , partial=True)
+        id=request.data.get("id")
+        obj=Customers.objects.get(User_id=id)
+        ser=CustomerSerializers(obj , data=request.data , partial=True)
         if ser.is_valid():
             ser.save()
             return Response("Updated Successfully")
         return Response(ser.errors)
     
     elif request.method=="DELETE":
-        id=request.data["id"]
-        obj=Customers.objects.get(id=id)
-        obj.delete()
+        id=request.data
+        obj=Customers.objects.get(User_id=id)
+        if obj.Profile_picture:
+            obj.Profile_picture.delete()
+            return Response("Profile picture deleted")
+        # obj.delete()
         return Response("Customer Deleted")
     
 
