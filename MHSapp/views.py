@@ -141,6 +141,8 @@ class LogoutView(APIView):
 def Customer_registration(request):
     try:
         data = request.data
+        print("************************************")
+        print(data)
         contact = data.get("contact")
         if not re.match(r'^[6-9]\d{9}$', str(contact)):
             return Response(
@@ -160,7 +162,8 @@ def Customer_registration(request):
         customer = Customers.objects.create(
             User_id=user,
             Contact=data["contact"],
-            Email=data["email"]  # optional, else skip this field
+            Email=data["email"],# optional, else skip this field
+            Profile_picture=data["Profile_picture"] 
         )
 
         # Create Address
@@ -228,7 +231,6 @@ def UserView(request):
     
     elif request.method == "DELETE":
         user_id = request.GET.get("id")
-        print(user_id)
         obj = CustomUser.objects.get(id=user_id)
         obj.delete()
         return Response("User deleted")
@@ -252,18 +254,21 @@ def CustomerView(request):
         return Response(ser.errors)
     
     elif request.method=="PUT":
-        cart_id=request.data.get("id")
-        cart_obj=Customers.objects.get(id=cart_id)
-        ser=CustomerSerializers(cart_obj , data=request.data , partial=True)
+        id=request.data.get("id")
+        obj=Customers.objects.get(User_id=id)
+        ser=CustomerSerializers(obj , data=request.data , partial=True)
         if ser.is_valid():
             ser.save()
             return Response("Updated Successfully")
         return Response(ser.errors)
     
     elif request.method=="DELETE":
-        id=request.data["id"]
-        obj=Customers.objects.get(id=id)
-        obj.delete()
+        id=request.data
+        obj=Customers.objects.get(User_id=id)
+        if obj.Profile_picture:
+            obj.Profile_picture.delete()
+            return Response("Profile picture deleted")
+        # obj.delete()
         return Response("Customer Deleted")
     
 
