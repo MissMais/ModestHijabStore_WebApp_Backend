@@ -36,6 +36,7 @@ class CustomUser(AbstractUser):
         return self.email
 
 class Customers(models.Model):
+    Customer_id= models.AutoField(primary_key=True )
     User_id=models.OneToOneField(CustomUser,on_delete=models.CASCADE  )
     Email=models.EmailField(max_length=25 , unique=True) 
     Contact=models.PositiveBigIntegerField()

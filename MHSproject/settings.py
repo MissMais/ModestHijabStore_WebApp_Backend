@@ -87,7 +87,7 @@ CORS_ALLOWED_ORIGINS=[
    'http://localhost:5173', 
    "http://localhost:8081",
    "http://192.168.29.199:8081",
-   "https://196fe80b8e99.ngrok-free.app"
+   "https://50582e23b57e.ngrok-free.app"
    
 ]
 CORS_ALLOW_HEADERS = list(default_headers) + [
@@ -115,14 +115,15 @@ WSGI_APPLICATION = 'MHSproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
-#         'NAME':'MHS_DB',
-#         'USER':'root',
-#         'PASSWORD':'sakln7794',
-#         'HOST':'localhost',
-#         'PORT':'3306',
+#         'NAME': 'mhs2_db',
+#         'USER': 'root',
+#         'PASSWORD': 'ILENJwXWOVlLADHnESeadHtBYPwzxtPY',
+#         'HOST': 'nozomi.proxy.rlwy.net',
+#         'PORT': '37333',
 #     }
 # }
 DATABASES = {

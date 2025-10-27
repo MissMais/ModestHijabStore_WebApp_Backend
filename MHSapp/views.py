@@ -141,8 +141,6 @@ class LogoutView(APIView):
 def Customer_registration(request):
     try:
         data = request.data
-        print("************************************")
-        print(data)
         contact = data.get("contact")
         if not re.match(r'^[6-9]\d{9}$', str(contact)):
             return Response(
@@ -254,8 +252,8 @@ def CustomerView(request):
         return Response(ser.errors)
     
     elif request.method=="PUT":
-        id=request.data.get("id")
-        obj=Customers.objects.get(User_id=id)
+        id=request.data.get("Customer_id")
+        obj=Customers.objects.get(Customer_id=id)
         ser=CustomerSerializers(obj , data=request.data , partial=True)
         if ser.is_valid():
             ser.save()
@@ -264,7 +262,7 @@ def CustomerView(request):
     
     elif request.method=="DELETE":
         id=request.data
-        obj=Customers.objects.get(User_id=id)
+        obj=Customers.objects.get(Customer_id=id)
         if obj.Profile_picture:
             obj.Profile_picture.delete()
             return Response("Profile picture deleted")
@@ -452,12 +450,10 @@ def Homepageimage(request):
 
     elif request.method=="POST":
         data= request.data
-        print(data)
         serializer=HomepageimageSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        print(serializer.errors)
         return Response(serializer.errors)
 
 
@@ -678,7 +674,7 @@ class AddToCartAPIView(APIView):
             # 1. Authentication check
             if request.user.is_anonymous:
                 return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
-            customer = Customers.objects.get(User_id=request.user)
+            customer = Customers.objects.get(Customer_id=request.user)
             cart = Cart.objects.get(customer_id=customer)
             cart_items = Cart_item.objects.filter(Cart_id=cart)  
             if not cart_items.exists():
@@ -696,7 +692,7 @@ class AddToCartAPIView(APIView):
         try:      
             if request.user.is_anonymous:
                 return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)  
-            customer = Customers.objects.get(User_id=request.user)
+            customer = Customers.objects.get(Customer_id=request.user)
             cart, _ = Cart.objects.get_or_create(customer_id=customer)
             quantity = int(request.data.get("quantity", 1))
             product_variation = Productvariation.objects.get(pk=request.data['product_variation_id'])
@@ -730,7 +726,7 @@ class AddToCartAPIView(APIView):
         try:
             if request.user.is_anonymous:
                 return Response({"error": "Authentication required"}, status=401)
-            customer = Customers.objects.get(User_id=request.user)
+            customer = Customers.objects.get(Customer_id=request.user)
             cart = Cart.objects.get(customer_id=customer)
             cart_item_id = request.data.get("cart_item_id")
             quantity = int(request.data.get("quantity", 1))
@@ -746,7 +742,7 @@ class AddToCartAPIView(APIView):
         try:
             if request.user.is_anonymous:
                 return Response({"error": "Authentication required"}, status=401)
-            customer = Customers.objects.get(User_id=request.user)
+            customer = Customers.objects.get(Customer_id=request.user)
             cart = Cart.objects.get(customer_id=customer)
             cart_item_id = request.data.get("cart_item_id", None)
             if cart_item_id:
@@ -772,7 +768,7 @@ class PlaceOrderAPIView(APIView):
         try:
             if request.user.is_anonymous:
                 return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
-            customer = Customers.objects.get(User_id=request.user)
+            customer = Customers.objects.get(Customer_id=request.user)
             orders = Order.objects.filter(Cart_id__customer_id=customer)
             orders_data = [
                 {
@@ -794,7 +790,7 @@ class PlaceOrderAPIView(APIView):
         try:
             if request.user.is_anonymous:
                 return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
-            customer = Customers.objects.get(User_id=request.user)
+            customer = Customers.objects.get(Customer_id=request.user)
             cart = Cart.objects.get(customer_id=customer)    
             cart_item_id_list = []
             for l in request.data['cart_item_id']:
@@ -916,7 +912,7 @@ class PlaceOrderAPIView(APIView):
             if request.user.is_anonymous:
                 return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
 
-            customer = Customers.objects.get(User_id=request.user)
+            customer = Customers.objects.get(Customer_id=request.user)
             order = Order.objects.get(Order_id=order_id, Cart_id__customer_id=customer)
             order_status = request.data.get("order_status")
             payment_confirmation = request.data.get("payment_confirmation")
@@ -937,7 +933,7 @@ class PlaceOrderAPIView(APIView):
         try:
             if request.user.is_anonymous:
                 return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
-            customer = Customers.objects.get(User_id=request.user)
+            customer = Customers.objects.get(Customer_id=request.user)
             order = Order.objects.get(Order_id=order_id, Cart_id__customer_id=customer)
             order.delete()
             return Response({"message": "Order cancelled successfully"}, status=status.HTTP_200_OK)
@@ -967,7 +963,7 @@ def WishlistView(request):
         ser=WishlistSerializers(data=post_data)
         if ser.is_valid():
             ser.save()
-            customer=Customers.objects.get(User_id=customer)
+            customer=Customers.objects.get(Customer_id=customer)
             message="You just added and item in your wishlist..."
             Notifications.objects.create(customer_id=customer,notification_msg=message)
             return Response({"message":"Wishlist Added Successfully"})
@@ -975,7 +971,6 @@ def WishlistView(request):
     
     elif request.method=="PUT":
         wish_id=request.data.get("wishlist_id")
-        # print(wish_id)
         obj=Wishlist.objects.get(wishlist_id=wish_id)
         ser=WishlistSerializers(obj,data=request.data,partial=True)
         if ser.is_valid():
@@ -985,8 +980,6 @@ def WishlistView(request):
     
     elif request.method=="DELETE":
         id=request.data["wishlist_id"]
-        # id =request.data.GET.get
-        print(id)
         obj=Wishlist.objects.get(wishlist_id=id)
         obj.delete()
         return Response("Wishlist Deleted")
