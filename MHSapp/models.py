@@ -34,16 +34,39 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
-
+    
+import re
 class Customers(models.Model):
+    Customer_id = models.CharField(primary_key=True, max_length=50, editable=False)
     User_id=models.OneToOneField(CustomUser,on_delete=models.CASCADE  )
     Email=models.EmailField(max_length=25 , unique=True) 
     Contact=models.PositiveBigIntegerField()
     Profile_picture=models.ImageField(blank=True, null=True)
 
+ 
+    def save(self, *args, **kwargs):
+        if not self.Customer_id:
+            with transaction.atomic():
+                last_customer = Customers.objects.select_for_update().order_by('-Customer_id').first()
+                
+                new_id_num = 1
+                if last_customer:
+                    match = re.search(r'(\d+)$', last_customer.Customer_id)
+                    if match:
+                        last_id_num = int(match.group(1))
+                        new_id_num = last_id_num + 1
+                
+
+                self.Customer_id = f'CUST_{new_id_num:03d}'
+                
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.Customer_id
+
 class Address(models.Model):
     Address_id = models.AutoField(primary_key=True )
-    User_id=models.ForeignKey(Customers, on_delete=models.CASCADE,related_name="userid" )
+    Customer_id=models.ForeignKey(Customers, on_delete=models.CASCADE,related_name="userid" )
     Address_type=models.CharField(max_length=50)
     Name=models.CharField(max_length=50)
     House_No=models.PositiveIntegerField()
@@ -64,7 +87,6 @@ class Product(models.Model):
     product_description = models.CharField(max_length=50, blank=True, null=True)
     Brand_id=models.ForeignKey('Brands',models.CASCADE,related_name="brandid")
     sub_category = models.ForeignKey('Subcategory', models.CASCADE , related_name="products")
-    availability = models.CharField(max_length=50, blank=True, null=True)
     price = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
@@ -205,6 +227,7 @@ class Productvariation(models.Model):
     variation_option_id = models.ForeignKey('Variationoption', models.CASCADE, related_name='variationoptionid')
     stock = models.PositiveIntegerField(blank=True, null=True)
     avg_rating=models.FloatField(null=True,blank=True)
+    availability = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         db_table = 'productvariation'

@@ -41,7 +41,8 @@ urlpatterns=[
      path("brand/",BrandView),
      path("test/", create_payment, name="create-payment"),
      path("variety/",VarietyView),
-     path("rating/",Customer_ratingView)
+     path("rating/",Customer_ratingView),
+     path("chat/",chat)
  ] + static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
 
 
